@@ -127,8 +127,11 @@ class SubscriptionService : Service(), CoroutineScope {
 
     private fun fetchJsonAsync(url: URL, max: Int, notification: NotificationCompat.Builder) = async(Dispatchers.IO) {
         val tempFile = File.createTempFile("subscription-", ".json", cacheDir)
+        val conn = url.openConnection() as HttpURLConnection
+        val versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName
+        conn.setRequestProperty("User-agent", "shadowsocks-android/" + versionName)
         try {
-            (url.openConnection() as HttpURLConnection).useCancellable {
+            conn.useCancellable {
                 tempFile.outputStream().use { out -> inputStream.copyTo(out) }
             }
             tempFile
